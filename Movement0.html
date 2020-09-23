@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Animation Prompts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Karla&family=Ubuntu:wght@700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <h1>Animation Prompts</h1>
+
+
+    <!--Add buttons to initiate auth sequence and sign out-->
+
+
+    <pre id="content" style="white-space: pre-wrap;">Generating movement...</pre>
+    <div id="buttonContainer">
+      <button id="gen" onclick=writeData("any")>Surprise Me</button>
+<div>
+      <button id="genE" onclick=writeData("easy")>Easy</button>
+
+    <button id="genM" onclick=writeData("med")>Medium</button>
+    <button id="genH" onclick=writeData("hard")>Hard</button></div></div>
+
+
+    <script type="text/javascript">
+      // Client ID and API key from the Developer Console
+      var CLIENT_ID = '905403029615-rudpmrer0psud349nb66j8e4k3p9o4nf.apps.googleusercontent.com';
+      var API_KEY = 'AIzaSyBYjRkiwuH3a-Y4D2Fg5oz7VIIbP2nn8V8';
+
+      // Array of API discovery doc URLs for APIs used by the quickstart
+      var DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
+
+      // Authorization scopes required by the API; multiple scopes can be
+      // included, separated by spaces.
+      var SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
+
+      var moveArr = [];
+      var medArr = [];
+      var easyArr = [];
+      var hardArr = [];
+      /**
+       *  On load, called to load the auth2 library and API client library.
+       */
+      function handleClientLoad() {
+        gapi.load('client:auth2', initClient);
+
+      }
+
+      /**
+       *  Initializes the API client library and sets up sign-in state
+       *  listeners.
+       */
+      function initClient() {
+        gapi.client.init({
+          apiKey: API_KEY,
+          clientId: CLIENT_ID,
+          discoveryDocs: DISCOVERY_DOCS,
+          scope: SCOPES
+        }).then(function () {
+
+          // Handle the initial sign-in state.
+
+          listMovements();
+
+        });
+      }
+
+
+
+      function getRandomInt(max) {
+        return Math.floor(Math.random() * Math.floor(max));
+}
+
+
+      function writeData(mode){
+
+        var pre = document.getElementById('content');
+
+        if(mode=='med'){
+          var movements = medArr;
+        } else if(mode=='easy'){
+          var movements = easyArr;
+        }else if(mode=='hard'){
+          var movements = hardArr;
+        } else{
+          var movements = moveArr;
+        }
+
+        var rand = getRandomInt(movements.length);
+
+        if (pre.hasChildNodes()) {
+            pre.removeChild(pre.childNodes[0]);
+          }
+
+        var textContent = document.createTextNode(movements[rand].movement);
+        pre.appendChild(textContent);
+
+      }
+
+      function listMovements() {
+        gapi.client.sheets.spreadsheets.values.get({
+          spreadsheetId: '1_NOVBp75PT3ZEUd51SOspHbMUsO9HNsPXzUm_BcRc7c',
+          range: 'A1:B',
+        }).then(function(response) {
+          var range = response.result;
+
+          if (range.values.length > 0) {
+
+            for (i = 0; i < range.values.length; i++) {
+              var row = range.values[i];
+
+              var actionObject={movement:row[0], difficulty:row[1]};
+
+
+              if(actionObject.difficulty){
+                moveArr.push(actionObject);
+              }
+
+              if(actionObject.difficulty=="easy"){
+                easyArr.push(actionObject);
+              }else if(actionObject.difficulty=="medium"){
+                medArr.push(actionObject);
+              }else if(actionObject.difficulty=="hard"){
+                hardArr.push(actionObject);
+              }
+            }
+            writeData(actionObject.difficulty);
+          }
+        });
+      }
+
+    </script>
+
+    <script async defer src="https://apis.google.com/js/api.js"
+      onload="this.onload=function(){};handleClientLoad()"
+      onreadystatechange="if (this.readyState === 'complete') this.onload()">
+
+    </script>
+  </body>
+</html>
