@@ -8,20 +8,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Karla&family=Ubuntu:wght@700&display=swap" rel="stylesheet">
   </head>
   <body>
-    <h1>Animation <br>Prompts</h1>
+    <h1>Animation <br> Prompts</h1>
 
 
     <!--Add buttons to initiate auth sequence and sign out-->
-
-
+    <div id="textContainer">
+    <pre id="content1" style="white-space: pre-wrap;">Generating emotion...</pre>
     <pre id="content" style="white-space: pre-wrap;">Generating movement...</pre>
-    <div id="buttonContainer">
-      <button id="gen" onclick=writeData("any")>Surprise Me</button>
-<div>
-      <button id="genE" onclick=writeData("easy")>Easy</button>
+  </div>
 
-    <button id="genM" onclick=writeData("med")>Medium</button>
-    <button id="genH" onclick=writeData("hard")>Hard</button></div></div>
+    <div id="buttonContainer">
+      <button id="gen" onclick=writeData("any")>I don't like <br> this combo</button>
+<div>
 
 
     <script type="text/javascript">
@@ -37,9 +35,8 @@
       var SCOPES = "https://www.googleapis.com/auth/spreadsheets.readonly";
 
       var moveArr = [];
-      var medArr = [];
-      var easyArr = [];
-      var hardArr = [];
+      var emoArr = [];
+
       /**
        *  On load, called to load the auth2 library and API client library.
        */
@@ -74,35 +71,36 @@
 }
 
 
-      function writeData(mode){
-
+      function writeData(){
+        var pre1 = document.getElementById('content1');
         var pre = document.getElementById('content');
 
-        if(mode=='med'){
-          var movements = medArr;
-        } else if(mode=='easy'){
-          var movements = easyArr;
-        }else if(mode=='hard'){
-          var movements = hardArr;
-        } else{
-          var movements = moveArr;
-        }
 
-        var rand = getRandomInt(movements.length);
+          var movements = moveArr;
+          var emotions = emoArr;
+
+
+        var randMove = getRandomInt(movements.length);
+        var randEmo = getRandomInt(emotions.length);
 
         if (pre.hasChildNodes()) {
             pre.removeChild(pre.childNodes[0]);
           }
+          if (pre1.hasChildNodes()) {
+              pre1.removeChild(pre1.childNodes[0]);
+            }
 
-        var textContent = document.createTextNode(movements[rand].movement);
+        var textContent = document.createTextNode(movements[randMove]);
+        var textContent1 = document.createTextNode(emotions[randEmo]);
         pre.appendChild(textContent);
+        pre1.appendChild(textContent1);
 
       }
 
       function listMovements() {
         gapi.client.sheets.spreadsheets.values.get({
           spreadsheetId: '1_NOVBp75PT3ZEUd51SOspHbMUsO9HNsPXzUm_BcRc7c',
-          range: 'A1:B',
+          range: 'ExpressionMovements!A1:B',
         }).then(function(response) {
           var range = response.result;
 
@@ -111,22 +109,18 @@
             for (i = 0; i < range.values.length; i++) {
               var row = range.values[i];
 
-              var actionObject={movement:row[0], difficulty:row[1]};
+              var movement=row[0];
+              var emotion=row[1];
 
-
-              if(actionObject.difficulty){
-                moveArr.push(actionObject);
+              if(movement){
+                moveArr.push(movement);
+              }
+              if (emotion){
+                emoArr.push(emotion);
               }
 
-              if(actionObject.difficulty=="easy"){
-                easyArr.push(actionObject);
-              }else if(actionObject.difficulty=="medium"){
-                medArr.push(actionObject);
-              }else if(actionObject.difficulty=="hard"){
-                hardArr.push(actionObject);
-              }
             }
-            writeData(actionObject.difficulty);
+            writeData();
           }
         });
       }
